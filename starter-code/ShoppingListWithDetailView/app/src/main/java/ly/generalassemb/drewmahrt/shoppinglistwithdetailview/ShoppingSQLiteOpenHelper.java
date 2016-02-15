@@ -2,17 +2,12 @@ package ly.generalassemb.drewmahrt.shoppinglistwithdetailview;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.Arrays;
 
 /**
  * Created by drewmahrt on 12/28/15.
@@ -95,18 +90,23 @@ public class ShoppingSQLiteOpenHelper extends SQLiteOpenHelper{
         return deleteNum;
     }
 
+    public Cursor getItem(int id) {
+        SQLiteDatabase db = getReadableDatabase();
+        String[] selectionArgs = {String.valueOf(id)};
+        return db.query(SHOPPING_LIST_TABLE_NAME, SHOPPING_COLUMNS, "_id = ?", selectionArgs, null, null, null, null);
+    }
+
     public Cursor searchShoppingList(String query){
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(SHOPPING_LIST_TABLE_NAME, // a. table
-                SHOPPING_COLUMNS, // b. column names
-                COL_ITEM_NAME + " LIKE ?", // c. selections
-                new String[]{"%" + query + "%"}, // d. selections args
-                null, // e. group by
-                null, // f. having
-                null, // g. order by
-                null); // h. limit
-
-        return cursor;
+        SQLiteDatabase db = getReadableDatabase();
+        String selection = "";
+        for (int i = 1; i < SHOPPING_COLUMNS.length; i++) {
+            selection += SHOPPING_COLUMNS[i] + " LIKE ?";
+            if (i < SHOPPING_COLUMNS.length - 1) {
+                selection += " OR ";
+            }
+        }
+        Log.i(TAG, Arrays.toString(SHOPPING_COLUMNS));
+        String[] selectionArgs = {"%" + query + "%", "%" + query + "%", "%" + query + "%", "%" + query + "%"};
+        return db.query(SHOPPING_LIST_TABLE_NAME, SHOPPING_COLUMNS, selection, selectionArgs, null, null, null);
     }
 }
